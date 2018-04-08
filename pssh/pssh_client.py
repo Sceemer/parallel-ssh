@@ -21,6 +21,8 @@ if 'threading' in sys.modules:
 from gevent import monkey  # noqa: E402
 monkey.patch_all()
 import logging  # noqa: E402
+import warnings  # noqa: E402
+from os import linesep
 
 import gevent.pool  # noqa: E402
 import gevent.hub  # noqa: E402
@@ -33,6 +35,18 @@ from .ssh_client import SSHClient  # noqa: E402
 
 
 logger = logging.getLogger('pssh')
+
+warnings.warn(
+    "This client will be replaced as the default client "
+    "by the better performing and non-monkey patching "
+    "pssh.pssh2_client.ParallelSSHClient from 2.0.0 onwards.%(nl)s"
+    "Please ensure required functionality is supported by the new client by "
+    "switching to 'from pssh.clients import ParallelSSHClient'. "
+    "The pssh2_client import will continue to be supported for compatibility "
+    "purposes. %(nl)s"
+
+    "To continue using this client please update code to "
+    "'from pssh.clients.parallel.paramiko import ParallelSSHClient'.""" % ({'nl': linesep}))
 
 
 class ParallelSSHClient(BaseParallelSSHClient):
