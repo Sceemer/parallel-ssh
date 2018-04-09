@@ -22,7 +22,7 @@ from gevent import monkey  # noqa: E402
 monkey.patch_all()
 import logging  # noqa: E402
 import warnings  # noqa: E402
-from os import linesep
+from os import linesep  # noqa: E402
 
 import gevent.pool  # noqa: E402
 import gevent.hub  # noqa: E402
@@ -42,8 +42,8 @@ warnings.warn(
     "pssh.clients.native.ParallelSSHClient from 2.0.0 onwards.%(nl)s"
     "Please ensure required functionality is supported by the new client by "
     "switching to 'from pssh.clients import ParallelSSHClient'. "
-    "The pssh2_client import for the new client will continue to be supported for "
-    "compatibility purposes. %(nl)s"
+    "The pssh2_client import for the new client will continue to be supported "
+    "for compatibility purposes. %(nl)s"
 
     "To continue using this client please update imports to "
     "'from pssh.clients.miko import ParallelSSHClient'.""" % ({'nl': linesep}))
