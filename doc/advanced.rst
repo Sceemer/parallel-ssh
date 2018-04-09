@@ -27,7 +27,7 @@ A private key can also be provided programmatically.
 .. code-block:: python
 
   from pssh.utils import load_private_key
-  from pssh.clients import ParallelSSHClient
+  from pssh.pssh_client import ParallelSSHClient
 
   client = ParallelSSHClient(hosts, pkey=load_private_key('my_key'))
 
@@ -421,7 +421,7 @@ To copy the local file with relative path ``../test`` to the remote relative pat
 
 .. code-block:: python
 
-   from pssh.clients import ParallelSSHClient
+   from pssh.pssh_client import ParallelSSHClient
    from gevent import joinall
    
    client = ParallelSSHClient(hosts)
@@ -449,7 +449,7 @@ Copying remote files in parallel requires that file names are de-duplicated othe
 
 .. code-block:: python
 
-   from pssh.clients import ParallelSSHClient
+   from pssh.pssh_client import ParallelSSHClient
    from gevent import joinall
    
    client = ParallelSSHClient(hosts)
@@ -470,7 +470,7 @@ If wanting to copy a file from a single remote host and retain the original file
 
 .. code-block:: python
 
-   from pssh.clients import SSHClient
+   from pssh.pssh_client import SSHClient
 
    client = SSHClient('localhost')
    client.copy_remote_file('remote_filename', 'local_filename')

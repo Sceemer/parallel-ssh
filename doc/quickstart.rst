@@ -28,7 +28,7 @@ Make a list or other iterable of the hosts to run on:
 .. code-block:: python
 
     from __future__ import print_function
-    from pssh.clients import ParallelSSHClient
+    from pssh.pssh_client import ParallelSSHClient
     
     hosts = ['host1', 'host2', 'host3', 'host4']
 
