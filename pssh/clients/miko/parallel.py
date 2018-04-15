@@ -21,7 +21,7 @@ if 'threading' in sys.modules:
 from gevent import monkey  # noqa: E402
 monkey.patch_all()
 import logging  # noqa: E402
-import warnings  # noqa: E402
+from warnings import warn  # noqa: E402
 from os import linesep  # noqa: E402
 
 import gevent.pool  # noqa: E402
@@ -36,7 +36,7 @@ from .single import SSHClient  # noqa: E402
 
 logger = logging.getLogger('pssh')
 
-warnings.warn(
+warn(
     "This client will be replaced as the default client "
     "by the better performing and non-monkey patching "
     "pssh.clients.native.ParallelSSHClient from 2.0.0 onwards.%(nl)s"
