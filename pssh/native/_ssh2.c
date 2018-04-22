@@ -733,9 +733,9 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "pssh/native/_ssh2.pyx",
-  "env3/lib/python3.4/site-packages/ssh2/session.pxd",
-  "env3/lib/python3.4/site-packages/ssh2/sftp.pxd",
-  "env3/lib/python3.4/site-packages/ssh2/sftp_handle.pxd",
+  "session.pxd",
+  "sftp.pxd",
+  "sftp_handle.pxd",
 };
 /* NoFastGil.proto */
 #define __Pyx_PyGILState_Ensure PyGILState_Ensure

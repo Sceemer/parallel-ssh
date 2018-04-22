@@ -1363,6 +1363,14 @@ class ParallelSSHClientTest(unittest.TestCase):
         self.assertEqual(len(contents), len(_out))
         self.assertListEqual(_contents, _out)
 
+    def test_agent_forwarding(self):
+        client = ParallelSSHClient(['localhost'], forward_ssh_agent=True)
+        client.run_command(self.fake_cmd)
+        output = client.run_command(self.cmd)
+        stdout = [list(output['localhost'].stdout) for k in output]
+        expected_stdout = [[self.resp]]
+        self.assertListEqual(stdout, expected_stdout)
+
     ## OpenSSHServer needs to run in its own thread for this test to work
     ##  Race conditions otherwise.
     #
