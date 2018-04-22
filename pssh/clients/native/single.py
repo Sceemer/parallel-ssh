@@ -225,18 +225,16 @@ class SSHClient(object):
 
     def open_session(self):
         """Open new channel from session"""
-        chan = self.session.open_session()
-        errno = self.session.last_errno()
-        while (chan is None and errno == LIBSSH2_ERROR_EAGAIN) \
-                or chan == LIBSSH2_ERROR_EAGAIN:
+        try:
+            chan = self.session.open_session()
+        except Exception as ex:
+            raise SessionError(ex)
+        while chan == LIBSSH2_ERROR_EAGAIN:
             wait_select(self.session)
             try:
                 chan = self.session.open_session()
             except Exception as ex:
                 raise SessionError(ex)
-            errno = self.session.last_errno()
-        if chan is None and errno != LIBSSH2_ERROR_EAGAIN:
-            raise SessionError(errno)
         return chan
 
     def execute(self, cmd, use_pty=False, channel=None):
