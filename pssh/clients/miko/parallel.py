@@ -36,17 +36,16 @@ from .single import SSHClient  # noqa: E402
 
 logger = logging.getLogger('pssh')
 
-warn(
-    "This client will be replaced as the default client "
-    "by the better performing and non-monkey patching "
-    "pssh.clients.native.ParallelSSHClient from 2.0.0 onwards.%(nl)s"
-    "Please ensure required functionality is supported by the new client by "
-    "switching to 'from pssh.clients import ParallelSSHClient'. "
-    "The pssh2_client import for the new client will continue to be supported "
-    "for compatibility purposes. %(nl)s"
-
-    "To continue using this client please update imports to "
-    "'from pssh.clients.miko import ParallelSSHClient'.""" % ({'nl': linesep}))
+_msg = "This client will be replaced as the default client " \
+       "by the better performing and non-monkey patching " \
+       "pssh.clients.native.ParallelSSHClient from 2.0.0 onwards.%(nl)s" \
+       "Please ensure required functionality is supported by the new client by " \
+       "switching to 'from pssh.clients import ParallelSSHClient'. " \
+       "The pssh2_client import for the new client will continue to be supported " \
+       "for backwards compatibility. %(nl)s%(nl)s" \
+       "To continue using this client please update imports to " \
+       "'from pssh.clients.miko import ParallelSSHClient'." % {'nl': linesep}
+warn(_msg)
 
 
 class ParallelSSHClient(BaseParallelSSHClient):
