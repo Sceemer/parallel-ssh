@@ -243,10 +243,15 @@ class ParallelSSHClient(BaseParallelSSHClient):
                      shell=None, use_shell=True, use_pty=True,
                      **paramiko_kwargs):
         """Make SSHClient, run command on host"""
-        self._make_ssh_client(host, **paramiko_kwargs)
-        return self.host_clients[host].exec_command(
-            command, sudo=sudo, user=user, shell=shell,
-            use_shell=use_shell, use_pty=use_pty)
+        try:
+            self._make_ssh_client(host, **paramiko_kwargs)
+            return self.host_clients[host].exec_command(
+                command, sudo=sudo, user=user, shell=shell,
+                use_shell=use_shell, use_pty=use_pty)
+        except Exception as ex:
+            ex.host = host
+            logger.error("Failed to run on host %s", host)
+            raise ex
 
     def get_output(self, cmd, output, encoding='utf-8'):
         """Get output from command greenlet.
