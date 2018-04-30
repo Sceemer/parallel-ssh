@@ -5,6 +5,7 @@ import logging
 import socket
 from sys import version_info
 
+from .embedded_server.embedded_server import make_socket
 from .embedded_server.openssh import OpenSSHServer
 from ssh2.session import Session
 from pssh.ssh2_client import SSHClient, logger as ssh_logger
@@ -40,3 +41,10 @@ class SSH2TestCase(unittest.TestCase):
     def tearDownClass(cls):
         cls.server.stop()
         del cls.server
+
+    def make_random_port(self, host=None):
+        host = self.host if not host else host
+        listen_socket = make_socket(host)
+        listen_port = listen_socket.getsockname()[1]
+        del listen_socket
+        return listen_port

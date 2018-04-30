@@ -196,6 +196,9 @@ class BaseParallelSSHClient(object):
             return
         return self._get_exit_code(host_output.channel)
 
+    def _get_exit_code(self, channel):
+        raise NotImplementedError
+
     def copy_file(self, local_file, remote_file, recurse=False, copy_args=None):
         """Copy local file to remote file in parallel
 

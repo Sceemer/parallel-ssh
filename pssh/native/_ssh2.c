@@ -4839,7 +4839,7 @@ static int __pyx_pymod_exec__ssh2(PyObject *__pyx_pyinit_module)
   /* "pssh/native/_ssh2.pyx":1
  * # This file is part of parallel-ssh.             # <<<<<<<<<<<<<<
  * 
- * # Copyright (C) 2014-2017 Panos Kittenis
+ * # Copyright (C) 2014-2018 Panos Kittenis.
  */
   __pyx_t_3 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);

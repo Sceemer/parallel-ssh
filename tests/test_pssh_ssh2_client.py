@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # This file is part of parallel-ssh.
@@ -40,6 +39,7 @@ from pssh.pssh2_client import ParallelSSHClient, logger as pssh_logger
 from pssh.exceptions import UnknownHostException, \
     AuthenticationException, ConnectionErrorException, SessionError, \
     HostArgumentException, SFTPError, SFTPIOError, Timeout
+from pssh.tunnel import Tunnel
 
 from .embedded_server.embedded_server import make_socket
 from .embedded_server.openssh import OpenSSHServer
@@ -52,7 +52,7 @@ pssh_logger.setLevel(logging.DEBUG)
 logging.basicConfig()
 
 
-class ParallelSSHClientTest(unittest.TestCase):
+class ParallelSSHClientTest(SSH2TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -82,13 +82,6 @@ class ParallelSSHClientTest(unittest.TestCase):
 
     def setUp(self):
         self.long_cmd = lambda lines: 'for (( i=0; i<%s; i+=1 )) do echo $i; sleep 1; done' % (lines,)
-
-    def make_random_port(self, host=None):
-        host = self.host if not host else host
-        listen_socket = make_socket(host)
-        listen_port = listen_socket.getsockname()[1]
-        del listen_socket
-        return listen_port
 
     def test_client_join_consume_output(self):
         output = self.client.run_command(self.cmd)
@@ -1382,47 +1375,46 @@ class ParallelSSHClientTest(unittest.TestCase):
         expected_stdout = [[self.resp]]
         self.assertListEqual(stdout, expected_stdout)
 
-    ## OpenSSHServer needs to run in its own thread for this test to work
-    ##  Race conditions otherwise.
-    #
-    # def test_tunnel(self):
-    #     proxy_host = '127.0.0.9'
-    #     server = OpenSSHServer(listen_ip=proxy_host, port=self.port)
-    #     server.start_server()
-    #     client = ParallelSSHClient(
-    #         [self.host], port=self.port, pkey=self.user_key,
-    #         proxy_host=proxy_host, proxy_port=self.port, num_retries=1,
-    #         proxy_pkey=self.user_key,
-    #         timeout=2)
-    #     client.join(client.run_command('echo me'))
+    def test_tunnel(self):
+        _port = self.make_random_port()
+        server = OpenSSHServer(listen_ip=self.host, port=_port)
+        proxy_host = '127.0.0.9'
+        proxy_port = self.make_random_port()
+        proxy_server = OpenSSHServer(listen_ip=proxy_host, port=proxy_port)
+        server.start_server()
+        proxy_server.start_server()
+        client = ParallelSSHClient(
+            [self.host], port=_port, pkey=self.user_key,
+            proxy_host=proxy_host, proxy_port=proxy_port, num_retries=1,
+            proxy_pkey=self.user_key,
+            timeout=1)
+        try:
+            tunnel = client._start_tunnel(self.host)
+            self.assertIsInstance(tunnel, Tunnel)
+            self.assertTrue(tunnel.tunnel_open.is_set())
+        finally:
+            server.stop()
+            proxy_server.stop()
 
-#     def test_proxy_remote_host_failure_timeout(self):
-#         """Test that timeout setting is passed on to proxy to be used for the
-#         proxy->remote host connection timeout
-#         """
-#         self.server.kill()
-#         server_timeout=0.2
-#         client_timeout=server_timeout-0.1
-#         server, listen_port = start_server_from_ip(self.host,
-#                                                    timeout=server_timeout)
-#         proxy_host = '127.0.0.2'
-#         proxy_server, proxy_server_port = start_server_from_ip(proxy_host)
-#         proxy_user = 'proxy_user'
-#         proxy_password = 'fake'
-#         client = ParallelSSHClient([self.host], port=listen_port,
-#                                    pkey=self.user_key,
-#                                    proxy_host='127.0.0.2',
-#                                    proxy_port=proxy_server_port,
-#                                    proxy_user=proxy_user,
-#                                    proxy_password='fake',
-#                                    proxy_pkey=self.user_key,
-#                                    num_retries=1,
-#                                    timeout=client_timeout,
-#                                    )
-#         try:
-#             self.assertRaises(
-#                 ConnectionErrorException, client.run_command, self.fake_cmd)
-#         finally:
-#             del client
-#             server.kill()
-#             proxy_server.kill()
+    def test_proxy_remote_host_failure_timeout(self):
+        server_timeout = 0.2
+        client_timeout = server_timeout - 0.1
+        proxy_host = '127.0.0.2'
+        proxy_server_port = self.make_random_port()
+        proxy_server = OpenSSHServer(
+            listen_ip=proxy_host, port=proxy_server_port)
+        proxy_server.start_server()
+        client = ParallelSSHClient([self.host], port=self.make_random_port(),
+                                   pkey=self.user_key,
+                                   proxy_host=proxy_host,
+                                   proxy_port=proxy_server_port,
+                                   proxy_pkey=self.user_key,
+                                   num_retries=1,
+                                   timeout=client_timeout,
+        )
+        try:
+            self.assertRaises(
+                ConnectionErrorException, client.run_command, self.cmd)
+        finally:
+            del client
+            proxy_server.stop()

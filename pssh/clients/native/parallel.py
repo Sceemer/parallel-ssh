@@ -21,7 +21,7 @@ from gevent import sleep
 from ..base_pssh import BaseParallelSSHClient
 from ...constants import DEFAULT_RETRIES, RETRY_DELAY
 from .single import SSHClient
-from ...exceptions import ProxyError, Timeout
+from ...exceptions import ProxyError, Timeout, ConnectionErrorException
 from ...tunnel import Tunnel
 
 
@@ -198,6 +198,10 @@ class ParallelSSHClient(BaseParallelSSHClient):
                 command, sudo=sudo, user=user, shell=shell,
                 use_pty=use_pty, encoding=encoding, timeout=timeout)
         except Exception as ex:
+            if host in self._tunnels and \
+                  not self._tunnels[host].tunnel_open.is_set():
+                logger.error("Proxy failure connecting to remote host")
+                ex = ConnectionErrorException(ex)
             ex.host = host
             logger.error("Failed to run on host %s", host)
             raise ex

@@ -21,6 +21,7 @@ import logging
 from gevent import socket, spawn, joinall, get_hub
 
 from ssh2.error_codes import LIBSSH2_ERROR_EAGAIN
+from ssh2.exceptions import ChannelFailure
 
 from .clients.native.single import SSHClient
 from .native._ssh2 import wait_select
@@ -133,13 +134,18 @@ class Tunnel(Thread):
                              self.fw_host, self.fw_port,
                              forward_addr)
                 self.session.set_blocking(1)
-                self.channel = self.session.direct_tcpip_ex(
-                    self.fw_host, self.fw_port, '127.0.0.1', forward_addr[1])
-                if self.channel is None:
+                try:
+                    self.channel = self.session.direct_tcpip_ex(
+                        self.fw_host, self.fw_port, '127.0.0.1',
+                        forward_addr[1])
+                except ChannelFailure:
                     self.forward_sock.close()
                     self.socket.close()
-                    raise Exception("Could not establish channel to %s:%s",
-                                    self.fw_host, self.fw_port)
+                    self.tunnel_open.clear()
+                    logger.error(
+                        "Tunnel could not establish forward channel to %s:%s",
+                        self.fw_host, self.fw_port)
+                    return
                 self.session.set_blocking(0)
                 source = spawn(self._read_forward_sock)
                 dest = spawn(self._read_channel)
