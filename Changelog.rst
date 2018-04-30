@@ -1,6 +1,27 @@
 Change Log
 ============
 
+1.6.0
+++++++
+
+Changes
+---------
+
+* Upgrade embedded ``libssh2`` in binary wheels to latest master branch plus enhancements.
+* Adds support for ECDSA host and client keys for native client.
+* Adds support for SHA-256 host key fingerprints for native client.
+* Added native client SSH agent forwarding implementation.
+* Added deprecation warnings for paramiko client.
+* Clients moved to their own package with backwards compatible imports.
+* Added deprecation warnings for client imports.
+
+Fixes
+------
+
+* Improve error handling and exceptions for native client tunnel.
+
+Note - embedded ``libssh2`` changes apply to binary wheels only.
+
 1.5.5
 ++++++
 
